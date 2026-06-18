@@ -1,0 +1,21 @@
+name: powerCookiez
+version: '${version}'
+
+main: me.foivos.powerCookiez.PowerCookiezMAIN
+api-version: '26.1.2'
+load: POSTWORLD
+
+commands:
+  cookiez:
+    description: Opens the cookie menu
+  setgear:
+    description: Sets your gear level
+  mycookie:
+    description: Shows your cookie info
+
+  pwring:
+    description: Activate the ring you're holding
+  myring:
+    description: Show your ring
+  rings:
+    description: Show all rings
