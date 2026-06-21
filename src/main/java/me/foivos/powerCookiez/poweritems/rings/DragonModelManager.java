@@ -3,16 +3,19 @@ package me.foivos.powerCookiez.poweritems.rings;
 import me.foivos.powerCookiez.PowerCookiezMAIN;
 import me.foivos.powerCookiez.poweritems.RingManager;
 import org.bukkit.*;
-import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.EnderDragon;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class DragonModelManager {
 
-    private final Map<UUID, Map<DragonPart, ArmorStand>> dragons = new HashMap<>();
+    private final Map<UUID, EnderDragon> dragons = new HashMap<>();
     private final PowerCookiezMAIN plugin = PowerCookiezMAIN.getInstance();
 
     public boolean isTransformed(Player p) {
@@ -21,114 +24,143 @@ public class DragonModelManager {
 
     public void spawnDragon(Player p) {
 
-        p.sendMessage("§5§lYou become the Shadow Dragon...");
+        removeDragon(p);
+
+        p.sendMessage("§5§lYou summon your Shadow Dragon!");
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1f, 0.6f);
 
-        p.addPotionEffect(new org.bukkit.potion.PotionEffect(
-                org.bukkit.potion.PotionEffectType.INVISIBILITY,
-                Integer.MAX_VALUE, 1, false, false, false
-        ));
+        EnderDragon dragon = (EnderDragon) p.getWorld().spawnEntity(
+                p.getLocation().clone().add(0, 5, 0),
+                EntityType.ENDER_DRAGON
+        );
 
-        Map<DragonPart, ArmorStand> parts = new HashMap<>();
+        dragon.setAI(false);
+        dragon.setInvulnerable(true);
+        dragon.setRemoveWhenFarAway(false);
+        dragon.setCustomName("§5Shadow Dragon");
+        dragon.setCustomNameVisible(true);
 
-        Location base = p.getLocation().clone().add(0, 2.2, 0);
+        dragons.put(p.getUniqueId(), dragon);
 
-        // === CORE ===
-        ArmorStand core = spawnPart(base, null);
-        parts.put(DragonPart.CORE, core);
+        // FOLLOW TASK
+        int id1 = new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!isTransformed(p)) {
+                    cancel();
+                    return;
+                }
 
-        // === HEAD ===
-        ArmorStand head = spawnPart(base.clone().add(0, 0.8, -1.2), Material.DRAGON_HEAD);
-        parts.put(DragonPart.HEAD, head);
+                EnderDragon d = dragons.get(p.getUniqueId());
+                if (d == null || d.isDead()) {
+                    cancel();
+                    return;
+                }
 
-        // === CHEST ===
-        ArmorStand chest = spawnPart(base.clone().add(0, 0.3, -0.5), Material.CRYING_OBSIDIAN);
-        parts.put(DragonPart.CHEST, chest);
+                Location target = p.getLocation().clone().add(0, 6, 0);
+                Vector dir = target.toVector().subtract(d.getLocation().toVector()).multiply(0.1);
 
-        // === BODY ===
-        ArmorStand body = spawnPart(base.clone().add(0, 0.1, 0.8), Material.BLACK_CONCRETE);
-        parts.put(DragonPart.BODY, body);
-
-        // === WINGS ===
-        ArmorStand wingL = spawnPart(base.clone().add(1.2, 0.4, 0.2), Material.BLACK_CONCRETE);
-        ArmorStand wingR = spawnPart(base.clone().add(-1.2, 0.4, 0.2), Material.BLACK_CONCRETE);
-        parts.put(DragonPart.WING_LEFT, wingL);
-        parts.put(DragonPart.WING_RIGHT, wingR);
-
-        // === TAIL ===
-        ArmorStand tail = spawnPart(base.clone().add(0, -0.1, 1.8), Material.BLACK_CONCRETE);
-        parts.put(DragonPart.TAIL, tail);
-
-        // === BREATH EMITTER ===
-        ArmorStand emitter = spawnPart(base.clone().add(0, 0.6, -1.6), Material.END_ROD);
-        parts.put(DragonPart.BREATH_EMITTER, emitter);
-
-        dragons.put(p.getUniqueId(), parts);
-
-        // === START ANIMATIONS ===
-        int id1 = new DragonFollowerTask(p, this).runTaskTimer(plugin, 1, 1).getTaskId();
+                d.setVelocity(dir);
+            }
+        }.runTaskTimer(plugin, 1L, 1L).getTaskId();
         RingManager.registerTask(p, id1);
 
-        int id2 = new DragonOrbitTask(p, this).runTaskTimer(plugin, 1, 1).getTaskId();
+        // HOVER TASK
+        int id2 = new BukkitRunnable() {
+            double t = 0;
+            @Override
+            public void run() {
+                if (!isTransformed(p)) {
+                    cancel();
+                    return;
+                }
+
+                EnderDragon d = dragons.get(p.getUniqueId());
+                if (d == null || d.isDead()) {
+                    cancel();
+                    return;
+                }
+
+                t += 0.1;
+                d.teleport(d.getLocation().clone().add(0, Math.sin(t) * 0.3, 0));
+            }
+        }.runTaskTimer(plugin, 1L, 1L).getTaskId();
         RingManager.registerTask(p, id2);
-
-        int id3 = new DragonHoverTask(p, this).runTaskTimer(plugin, 1, 1).getTaskId();
-        RingManager.registerTask(p, id3);
-
-        int id4 = new DragonWingAnimationTask(p, this).runTaskTimer(plugin, 1, 1).getTaskId();
-        RingManager.registerTask(p, id4);
     }
 
-    private ArmorStand spawnPart(Location loc, Material mat) {
-        ArmorStand as = loc.getWorld().spawn(loc, ArmorStand.class, stand -> {
-            stand.setInvisible(true);
-            stand.setMarker(true);
-            stand.setGravity(false);
-            stand.setSmall(false);
-            stand.setBasePlate(false);
-            stand.setArms(false);
-            stand.setInvulnerable(true);
-        });
-
-        if (mat != null) {
-            as.getEquipment().setHelmet(new ItemStack(mat));
-        }
-
-        return as;
-    }
-
-    public void removeDragon(Player p) {
+    public void startBreath(Player p) {
         if (!isTransformed(p)) return;
 
-        Map<DragonPart, ArmorStand> parts = dragons.remove(p.getUniqueId());
-        parts.values().forEach(ArmorStand::remove);
+        EnderDragon d = dragons.get(p.getUniqueId());
+        if (d == null || d.isDead()) return;
 
-        p.removePotionEffect(org.bukkit.potion.PotionEffectType.INVISIBILITY);
+        int id = new BukkitRunnable() {
+            int ticks = 0;
+            @Override
+            public void run() {
+                if (!isTransformed(p)) {
+                    cancel();
+                    return;
+                }
 
-        p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_DEATH, 1f, 0.8f);
+                EnderDragon dragon = dragons.get(p.getUniqueId());
+                if (dragon == null || dragon.isDead()) {
+                    cancel();
+                    return;
+                }
+
+                ticks++;
+                if (ticks > 40) {
+                    cancel();
+                    return;
+                }
+
+                Location loc = dragon.getLocation().clone().add(0, -2, -4);
+                Vector dir = p.getLocation().getDirection().normalize();
+
+                loc.getWorld().spawnParticle(Particle.DRAGON_BREATH, loc, 40, 0.4, 0.4, 0.4, 0.01);
+                loc.getWorld().playSound(loc, Sound.ENTITY_ENDER_DRAGON_SHOOT, 1f, 0.6f);
+
+                for (Player target : loc.getWorld().getPlayers()) {
+                    if (target != p && target.getLocation().distance(loc.add(dir)) < 3) {
+                        target.damage(2.0, p);
+                    }
+                }
+            }
+        }.runTaskTimer(plugin, 1L, 1L).getTaskId();
+
+        RingManager.registerTask(p, id);
     }
 
-    public Map<DragonPart, ArmorStand> getParts(Player p) {
-        return dragons.get(p.getUniqueId());
-    }
-
-    // === ABILITY B ===
     public void shadowDash(Player p) {
+        if (!isTransformed(p)) return;
+
         Vector dir = p.getLocation().getDirection().normalize().multiply(2.5);
         p.setVelocity(dir);
         p.getWorld().spawnParticle(Particle.PORTAL, p.getLocation(), 80, 1, 1, 1, 0.2);
         p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 1f, 1.2f);
     }
 
-    // === ABILITY C ===
-    public void startBreath(Player p) {
-        int id = new DragonBreathTask(p, this).runTaskTimer(plugin, 1, 1).getTaskId();
-        RingManager.registerTask(p, id);
+    public void corruptionBurst(Player p) {
+        if (!isTransformed(p)) return;
+
+        Location loc = p.getLocation();
+        loc.getWorld().spawnParticle(Particle.REVERSE_PORTAL, loc, 60, 1.5, 1.5, 1.5, 0.1);
+        loc.getWorld().playSound(loc, Sound.ENTITY_ENDER_DRAGON_GROWL, 1f, 0.5f);
+
+        for (Player target : loc.getWorld().getPlayers()) {
+            if (target != p && target.getLocation().distance(loc) < 6) {
+                target.damage(4.0, p);
+            }
+        }
     }
 
-    // === ABILITY D ===
-    public void corruptionBurst(Player p) {
-        p.getWorld().spawnParticle(Particle.REVERSE_PORTAL, p.getLocation(), 1);
-        p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1f, 0.5f);
+    public void removeDragon(Player p) {
+        EnderDragon d = dragons.remove(p.getUniqueId());
+        if (d != null && !d.isDead()) {
+            d.remove();
+        }
+
+        p.getWorld().playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_DEATH, 1f, 0.8f);
     }
 }

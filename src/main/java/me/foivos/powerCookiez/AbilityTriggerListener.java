@@ -7,9 +7,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.player.*;
 import org.bukkit.event.player.PlayerAnimationEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.event.player.PlayerAnimationType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,182 +19,160 @@ public class AbilityTriggerListener implements Listener {
 
     private final PowerCookiezMAIN plugin;
 
+    private final Map<UUID, Long> lastShift = new HashMap<>();
+    private final Map<UUID, Boolean> doubleShiftReady = new HashMap<>();
+
     public AbilityTriggerListener(PowerCookiezMAIN plugin) {
         this.plugin = plugin;
     }
 
-    private final Map<UUID, Integer> shiftCount = new HashMap<>();
-    private final Map<UUID, Long> lastShift = new HashMap<>();
-    private final Map<UUID, Long> shiftHoldStart = new HashMap<>();
-
-
     // ============================================================
-    // SHIFT EVENT (PRESS + RELEASE + HOLD + COMBOS)
+    // DOUBLE SHIFT DETECTION (<= 250ms)
     // ============================================================
     @EventHandler
-    public void onSneak(PlayerToggleSneakEvent e) {
+    public void onShift(PlayerToggleSneakEvent e) {
+        if (!e.isSneaking()) return;
+
         Player p = e.getPlayer();
         UUID id = p.getUniqueId();
 
-        // RING CHECK
-        RingPower ring = plugin.getRingManager().getHeldRing(p);
-        boolean hasRing = (ring != null && RingManager.isRingEnabled(p));
-
-        // COOKIE CHECK
-        String cookie = plugin.getCookieManager().getLastCookieEaten(p);
-        boolean hasCookie = (cookie != null);
-
-        // SHIFT RELEASE → RESET
-        if (!e.isSneaking()) {
-            shiftCount.put(id, 0);
-            return;
-        }
-
-        // SHIFT HOLD (ONLY FOR COOKIES)
-        shiftHoldStart.put(id, System.currentTimeMillis());
-
-        if (hasCookie) {
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                if (p.isSneaking()) {
-                    long start = shiftHoldStart.getOrDefault(id, 0L);
-                    if (System.currentTimeMillis() - start >= 3000) {
-                        plugin.getCookieManager().getCookie(cookie).activateGear6(p);
-                        shiftCount.put(id, 0);
-                    }
-                }
-            }, 60L);
-        }
-
-        // DOUBLE/TRIPLE SHIFT LOGIC
         long now = System.currentTimeMillis();
         long last = lastShift.getOrDefault(id, 0L);
 
-        if (now - last <= 3000) {
-            shiftCount.put(id, shiftCount.getOrDefault(id, 0) + 1);
-        } else {
-            shiftCount.put(id, 1);
+        if (now - last <= 250) {
+            doubleShiftReady.put(id, true);
+
+            Bukkit.getScheduler().runTaskLater(plugin, () ->
+                    doubleShiftReady.put(id, false), 20L);
         }
 
         lastShift.put(id, now);
-
-        // TRIPLE SHIFT → GEAR 3
-        if (shiftCount.get(id) == 3) {
-
-            if (hasRing) {
-                ring.abilityD(p);
-                shiftCount.put(id, 0);
-                return;
-            }
-
-            if (hasCookie) {
-                plugin.getCookieManager().getCookie(cookie).activateGear3(p);
-                shiftCount.put(id, 0);
-            }
-        }
     }
 
-
     // ============================================================
-    // RIGHT CLICK (Gear 1, Gear 4)
+    // RINGS — DOUBLE SHIFT + 1/2/3/4
     // ============================================================
     @EventHandler
-    public void onRightClick(PlayerInteractEvent e) {
+    public void onHotbarChange(PlayerItemHeldEvent e) {
         Player p = e.getPlayer();
         UUID id = p.getUniqueId();
 
-        if (!p.isSneaking()) return;
-
-        if (e.getAction() != Action.RIGHT_CLICK_AIR &&
-                e.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+        if (!doubleShiftReady.getOrDefault(id, false)) return;
 
         RingPower ring = plugin.getRingManager().getHeldRing(p);
-        boolean hasRing = (ring != null && RingManager.isRingEnabled(p));
+        if (ring == null) return;
 
-        String cookie = plugin.getCookieManager().getLastCookieEaten(p);
-        boolean hasCookie = (cookie != null);
+        int slot = e.getNewSlot();
 
-        int shifts = shiftCount.getOrDefault(id, 0);
-
-        // GEAR 4 — DOUBLE SHIFT + RIGHT CLICK
-        if (shifts == 2) {
-
-            if (hasRing) {
-                ring.abilityC(p);
-                shiftCount.put(id, 0);
-                return;
-            }
-
-            if (hasCookie) {
-                plugin.getCookieManager().getCookie(cookie).activateGear4(p);
-                shiftCount.put(id, 0);
-                return;
-            }
+        switch (slot) {
+            case 0 -> ring.abilityA(p);
+            case 1 -> ring.abilityB(p);
+            case 2 -> ring.abilityC(p);
+            case 3 -> ring.abilityD(p);
+            default -> { return; }
         }
 
-        // GEAR 1 — SHIFT + RIGHT CLICK
-        if (shifts == 1) {
-
-            if (hasRing) {
-                ring.abilityA(p);
-                shiftCount.put(id, 0);
-                return;
-            }
-
-            if (hasCookie) {
-                plugin.getCookieManager().getCookie(cookie).activateGear1(p);
-                shiftCount.put(id, 0);
-            }
-        }
+        e.setCancelled(true);
+        doubleShiftReady.put(id, false);
     }
 
-
     // ============================================================
-    // LEFT CLICK (Gear 2, Gear 5)
+    // COOKIE — DOUBLE SHIFT + Q → Gear 1
     // ============================================================
     @EventHandler
-    public void onLeftClick(PlayerAnimationEvent e) {
+    public void onDrop(PlayerDropItemEvent e) {
         Player p = e.getPlayer();
         UUID id = p.getUniqueId();
 
-        if (!p.isSneaking()) return;
+        if (!doubleShiftReady.getOrDefault(id, false)) return;
 
-        RingPower ring = plugin.getRingManager().getHeldRing(p);
-        boolean hasRing = (ring != null && RingManager.isRingEnabled(p));
+        e.setCancelled(true);
 
-        String cookie = plugin.getCookieManager().getLastCookieEaten(p);
-        boolean hasCookie = (cookie != null);
+        triggerCookieGear(p, 1);
 
-        int shifts = shiftCount.getOrDefault(id, 0);
+        doubleShiftReady.put(id, false);
+    }
 
-        // GEAR 5 — DOUBLE SHIFT + LEFT CLICK
-        if (shifts == 2) {
+    // ============================================================
+    // COOKIE — DOUBLE SHIFT + W/A/S → Gear 2/3/4
+    // (velocity-based, 100% reliable)
+    // ============================================================
+    @EventHandler
+    public void onMove(PlayerMoveEvent e) {
+        Player p = e.getPlayer();
+        UUID id = p.getUniqueId();
 
-            if (hasRing) {
-                ring.abilityC(p);
-                shiftCount.put(id, 0);
-                return;
-            }
+        if (!doubleShiftReady.getOrDefault(id, false)) return;
 
-            if (hasCookie) {
-                plugin.getCookieManager().getCookie(cookie).activateGear5(p);
-                shiftCount.put(id, 0);
-                return;
-            }
+        double vx = e.getTo().getX() - e.getFrom().getX();
+        double vz = e.getTo().getZ() - e.getFrom().getZ();
+
+        if (Math.abs(vx) < 0.08 && Math.abs(vz) < 0.08) return;
+
+        if (Math.abs(vx) > Math.abs(vz)) {
+            if (vx < 0) triggerCookieGear(p, 3); // A
+            else return;
+        } else {
+            if (vz < 0) triggerCookieGear(p, 2); // W
+            else triggerCookieGear(p, 4);        // S
         }
 
-        // GEAR 2 — SHIFT + LEFT CLICK
-        if (shifts == 1) {
+        doubleShiftReady.put(id, false);
+    }
 
-            if (hasRing) {
-                ring.abilityB(p);
-                shiftCount.put(id, 0);
-                return;
-            }
+    // ============================================================
+    // COOKIE — DOUBLE SHIFT + Z → Gear 5
+    // (SwapHandItemsEvent = F key, repurposed as Z)
+    // ============================================================
+    @EventHandler
+    public void onSwap(PlayerSwapHandItemsEvent e) {
+        Player p = e.getPlayer();
+        UUID id = p.getUniqueId();
 
-            if (hasCookie) {
-                plugin.getCookieManager().getCookie(cookie).activateGear2(p);
-                shiftCount.put(id, 0);
-            }
+        if (!doubleShiftReady.getOrDefault(id, false)) return;
+
+        e.setCancelled(true);
+
+        triggerCookieGear(p, 5);
+
+        doubleShiftReady.put(id, false);
+    }
+
+    // ============================================================
+    // COOKIE — DOUBLE SHIFT + X → Gear 6
+    // (Left-click animation = ARM_SWING)
+    // ============================================================
+    @EventHandler
+    public void onArmSwing(PlayerAnimationEvent e) {
+        if (e.getAnimationType() != PlayerAnimationType.ARM_SWING) return;
+
+        Player p = e.getPlayer();
+        UUID id = p.getUniqueId();
+
+        if (!doubleShiftReady.getOrDefault(id, false)) return;
+
+        triggerCookieGear(p, 6);
+
+        doubleShiftReady.put(id, false);
+    }
+
+    // ============================================================
+    // HELPER — Trigger cookie gear safely
+    // ============================================================
+    private void triggerCookieGear(Player p, int gear) {
+        String cookieName = plugin.getCookieManager().getLastCookieEaten(p);
+        if (cookieName == null) return;
+
+        var cookie = plugin.getCookieManager().getCookie(cookieName);
+        if (cookie == null) return;
+
+        switch (gear) {
+            case 1 -> cookie.activateGear1(p);
+            case 2 -> cookie.activateGear2(p);
+            case 3 -> cookie.activateGear3(p);
+            case 4 -> cookie.activateGear4(p);
+            case 5 -> cookie.activateGear5(p);
+            case 6 -> cookie.activateGear6(p);
         }
     }
 }

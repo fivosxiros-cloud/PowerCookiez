@@ -83,6 +83,13 @@ public class PowerCookiezMAIN extends JavaPlugin {
             return true;
         });
 
+        getCommand("keybinds").setExecutor((sender, cmd, label, args) -> {
+            if (sender instanceof Player p) {
+                me.foivos.powerCookiez.poweritems.gui.KeybindTutorialGUI.open(p);
+            }
+            return true;
+        });
+
         getServer().getPluginManager().registerEvents(new AbilityTriggerListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinLoad(this), this);
         getServer().getPluginManager().registerEvents(new GUIListener(), this);
