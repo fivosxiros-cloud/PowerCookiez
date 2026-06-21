@@ -1,5 +1,8 @@
-package me.foivos.powerCookiez;
+package me.foivos.powerCookiez.Cookiez.MyCookie;
 
+import me.foivos.powerCookiez.Cookiez.CookieManager;
+import me.foivos.powerCookiez.Cookiez.CookiePower;
+import me.foivos.powerCookiez.PowerCookiezMAIN;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;

@@ -112,12 +112,12 @@ public class RingManager {
     // ============================================================
     // COOLDOWNS
     // ============================================================
-    public static boolean checkCooldown(Player player, String ability, long cdMs) {
+    public static boolean isCooldown(Player player, String ability, long cdMs) {
 
         RingPower ring = getActiveRing(player);
         if (ring == null) {
             player.sendMessage("§cYou have no active ring!");
-            return false;
+            return true;
         }
 
         String key = ring.getName() + "_" + ability;
@@ -129,11 +129,11 @@ public class RingManager {
         if (now - last < cdMs) {
             long left = (cdMs - (now - last)) / 1000;
             player.sendMessage("§cAbility on cooldown: " + left + "s");
-            return false;
+            return true;
         }
 
         map.put(player.getUniqueId(), now);
-        return true;
+        return false;
     }
 
 
@@ -142,8 +142,7 @@ public class RingManager {
     // ============================================================
     public ItemStack getPlayerRingItem(Player p) {
         RingPower ring = getActiveRing(p);
-        if (ring == null) return null;
-        return ring.getDisplayItem();
+        return ring == null ? null : ring.getDisplayItem();
     }
 
 
@@ -152,7 +151,7 @@ public class RingManager {
     // ============================================================
     public boolean isHoldingRing(Player p) {
         ItemStack item = p.getInventory().getItemInMainHand();
-        if (item == null || !item.hasItemMeta()) return false;
+        if (!item.hasItemMeta()) return false;
 
         return item.getItemMeta().getPersistentDataContainer().has(
                 new NamespacedKey(PowerCookiezMAIN.getInstance(), "ringName"),
@@ -162,7 +161,7 @@ public class RingManager {
 
     public String getHeldRingName(Player p) {
         ItemStack item = p.getInventory().getItemInMainHand();
-        if (item == null || !item.hasItemMeta()) return null;
+        if (!item.hasItemMeta()) return null;
 
         return item.getItemMeta().getPersistentDataContainer().get(
                 new NamespacedKey(PowerCookiezMAIN.getInstance(), "ringName"),

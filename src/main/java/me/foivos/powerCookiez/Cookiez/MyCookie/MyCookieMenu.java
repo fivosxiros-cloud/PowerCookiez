@@ -1,6 +1,10 @@
-package me.foivos.powerCookiez;
+package me.foivos.powerCookiez.Cookiez.MyCookie;
 
-import org.bukkit.Bukkit;
+import me.foivos.powerCookiez.Cookiez.AllCookiez.CookiezInventory;
+import me.foivos.powerCookiez.Cookiez.CookieManager;
+import me.foivos.powerCookiez.PowerCookiezMAIN;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -25,7 +29,9 @@ public class MyCookieMenu implements Listener {
 
     public void open(Player player) {
 
-        Inventory inv = Bukkit.createInventory(null, 27, ChatColor.AQUA + "Your Cookie");
+        Inventory inv = new MyCookieInventory(plugin,
+                27,
+                Component.text("Your Cookie", NamedTextColor.AQUA)).getInventory();
 
         // ===========================
         // TOGGLE BUTTON (slot 26)
@@ -70,7 +76,8 @@ public class MyCookieMenu implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent e) {
-        if (!e.getView().getTitle().equals(ChatColor.AQUA + "Your Cookie")) return;
+        var inventory = e.getClickedInventory();
+        if (inventory == null || !(inventory.getHolder(false) instanceof MyCookieInventory)) return;
 
         e.setCancelled(true);
 
@@ -82,8 +89,8 @@ public class MyCookieMenu implements Listener {
             cookieManager.setCookieEnabled(p, !enabled);
 
             p.sendMessage(enabled
-                    ? ChatColor.RED + "Cookie disabled!"
-                    : ChatColor.GREEN + "Cookie enabled!"
+                    ? Component.text("Cookie disabled!", NamedTextColor.RED)
+                    : Component.text("Cookie enabled!", NamedTextColor.GREEN)
             );
 
             open(p); // refresh GUI

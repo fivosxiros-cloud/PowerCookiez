@@ -1,5 +1,8 @@
-package me.foivos.powerCookiez;
+package me.foivos.powerCookiez.Cookiez.Cookies;
 
+import me.foivos.powerCookiez.Cookiez.CookieManager;
+import me.foivos.powerCookiez.Cookiez.CookiePower;
+import me.foivos.powerCookiez.PowerCookiezMAIN;
 import org.bukkit.*;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -23,10 +26,14 @@ import java.util.*;
 
 public class ZeroGravityCookie implements CookiePower {
 
-    public static final Set<UUID> ZeroGravityNoFall = new HashSet<>();
+    private static final Set<UUID> zeroGravityNoFall = new HashSet<>();
     private final Map<UUID, Entity> grabbedTarget = new HashMap<>();
     private final Map<UUID, Long> grabExpire = new HashMap<>();
     private final Map<UUID, Long> lastDamage = new HashMap<>();
+
+    public static boolean isEnabledFor(Player p) {
+        return zeroGravityNoFall.contains(p.getUniqueId());
+    }
 
     // ============================================================
     // BASIC INFO
@@ -453,9 +460,9 @@ public class ZeroGravityCookie implements CookiePower {
         ));
 
         UUID uid = player.getUniqueId();
-        ZeroGravityNoFall.add(uid);
+        zeroGravityNoFall.add(uid);
         Bukkit.getScheduler().runTaskLater(PowerCookiezMAIN.getInstance(), () -> {
-            ZeroGravityNoFall.remove(uid);
+            zeroGravityNoFall.remove(uid);
         }, 300L);
 
         // 5) ZERO‑G JUMP

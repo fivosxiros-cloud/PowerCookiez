@@ -1,5 +1,8 @@
-package me.foivos.powerCookiez;
+package me.foivos.powerCookiez.Cookiez.Cookies;
 
+import me.foivos.powerCookiez.Cookiez.CookieManager;
+import me.foivos.powerCookiez.Cookiez.CookiePower;
+import me.foivos.powerCookiez.PowerCookiezMAIN;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;

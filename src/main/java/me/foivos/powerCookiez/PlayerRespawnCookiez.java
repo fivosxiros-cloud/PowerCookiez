@@ -1,5 +1,6 @@
 package me.foivos.powerCookiez;
 
+import me.foivos.powerCookiez.Cookiez.CookiePower;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerRespawnEvent;

@@ -1,4 +1,4 @@
-package me.foivos.powerCookiez;
+package me.foivos.powerCookiez.Cookiez;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

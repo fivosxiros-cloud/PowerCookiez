@@ -1,6 +1,11 @@
-package me.foivos.powerCookiez;
+package me.foivos.powerCookiez.Cookiez;
 
-import org.bukkit.ChatColor;
+import me.foivos.powerCookiez.Cookiez.Cookies.FrostyFrostCookie;
+import me.foivos.powerCookiez.Cookiez.Cookies.SmokySmokeCookie;
+import me.foivos.powerCookiez.Cookiez.Cookies.ZeroGravityCookie;
+import me.foivos.powerCookiez.PowerCookiezMAIN;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -151,8 +156,7 @@ public class CookieManager {
             if (p.getFireTicks() > 0) p.damage(1.0);
 
             for (Entity e : p.getNearbyEntities(1.5, 1.5, 1.5)) {
-                if (e instanceof LivingEntity && e != p) {
-                    LivingEntity le = (LivingEntity) e;
+                if (e instanceof LivingEntity le && e != p) {
                     le.setFreezeTicks(le.getFreezeTicks() + 40);
                     le.damage(2.0, p);
                 }
@@ -165,8 +169,7 @@ public class CookieManager {
                 frostAuraCooldown.put(p.getUniqueId(), now);
 
                 for (Entity e : p.getNearbyEntities(9, 9, 9)) {
-                    if (e instanceof LivingEntity && e != p) {
-                        LivingEntity le = (LivingEntity) e;
+                    if (e instanceof LivingEntity le && e != p) {
                         le.damage(6.0, p);
                         le.setFreezeTicks(le.getFreezeTicks() + 60);
                     }
@@ -191,8 +194,7 @@ public class CookieManager {
                 smokeAuraCooldown.put(p.getUniqueId(), now);
 
                 for (Entity e : p.getNearbyEntities(9, 9, 9)) {
-                    if (e instanceof LivingEntity && e != p) {
-                        LivingEntity le = (LivingEntity) e;
+                    if (e instanceof LivingEntity le && e != p) {
                         le.damage(6.0, p);
                     }
                 }
@@ -233,6 +235,6 @@ public class CookieManager {
             cookies.get(name).activate(player);
         }
 
-        player.sendMessage(ChatColor.AQUA + "You consumed the " + name + " cookie!");
+        player.sendMessage(Component.text("You consumed the " + name + " cookie!", NamedTextColor.AQUA));
     }
 }

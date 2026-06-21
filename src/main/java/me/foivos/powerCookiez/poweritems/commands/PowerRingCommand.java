@@ -9,16 +9,18 @@ import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public class PowerRingCommand implements CommandExecutor {
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command cmd, @NonNull String label, String @NotNull [] args) {
 
         if (!(sender instanceof Player p)) return true;
 
         ItemStack item = p.getInventory().getItemInMainHand();
-        if (item == null || !item.hasItemMeta()) {
+        if (!item.hasItemMeta()) {
             p.sendMessage("§cHold a ring in your hand!");
             return true;
         }

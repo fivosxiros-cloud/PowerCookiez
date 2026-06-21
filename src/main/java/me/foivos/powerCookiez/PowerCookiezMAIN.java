@@ -1,7 +1,16 @@
 package me.foivos.powerCookiez;
 
+import me.foivos.powerCookiez.Cookiez.AllCookiez.CookiezMenu;
+import me.foivos.powerCookiez.Cookiez.CookieEatListener;
+import me.foivos.powerCookiez.Cookiez.CookieEvents;
+import me.foivos.powerCookiez.Cookiez.CookieManager;
+import me.foivos.powerCookiez.Cookiez.MyCookie.MyCookieCommand;
+import me.foivos.powerCookiez.Cookiez.MyCookie.MyCookieMenu;
+import me.foivos.powerCookiez.Cookiez.Cookies.ZeroGravityCookie;
 import me.foivos.powerCookiez.poweritems.RingManager;
+import me.foivos.powerCookiez.poweritems.commands.CookiezCommand;
 import me.foivos.powerCookiez.poweritems.commands.PowerRingCommand;
+import me.foivos.powerCookiez.poweritems.commands.SetGearCommand;
 import me.foivos.powerCookiez.poweritems.gui.MyRingGUI;
 import me.foivos.powerCookiez.poweritems.gui.AllRingsGUI;
 import me.foivos.powerCookiez.poweritems.rings.MyRingMenuListener;
@@ -19,6 +28,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.util.Objects;
 
 public class PowerCookiezMAIN extends JavaPlugin {
 
@@ -41,15 +51,18 @@ public class PowerCookiezMAIN extends JavaPlugin {
         ringManager = new RingManager();
 
         // === Commands για rings ===
-        getCommand("pwring").setExecutor(new PowerRingCommand());
-        getCommand("myring").setExecutor((sender, cmd, label, args) -> {
-            if (sender instanceof Player p) MyRingGUI.open(p);
-            return true;
-        });
-        getCommand("rings").setExecutor((sender, cmd, label, args) -> {
-            if (sender instanceof Player p) AllRingsGUI.open(p);
-            return true;
-        });
+        Objects.requireNonNull(getCommand("pwring")).setExecutor(new PowerRingCommand());
+
+        Objects.requireNonNull(getCommand("myring"))
+                .setExecutor((sender, cmd, label, args) -> {
+                    if (sender instanceof Player p) MyRingGUI.open(p);
+                    return true;
+                });
+        Objects.requireNonNull(getCommand("rings"))
+                .setExecutor((sender, cmd, label, args) -> {
+                    if (sender instanceof Player p) AllRingsGUI.open(p);
+                    return true;
+                });
 
         // === Passive loop για rings ===
         RingManager.startPassiveLoop(this);
@@ -62,40 +75,47 @@ public class PowerCookiezMAIN extends JavaPlugin {
         RingManager.registerRing(new WolfyWolfRing());
         RingManager.registerRing(new FoxyFoxRing());
         RingManager.registerRing(new ShadowyDragonRing());
+
         cookieManager.registerCookie(new ZeroGravityCookie());
 
         // === Listeners ===
         MyCookieMenu myCookieMenu = new MyCookieMenu(this);
         getServer().getPluginManager().registerEvents(myCookieMenu, this);
-        getCommand("mycookie").setExecutor((sender, cmd, label, args) -> {
-            if (sender instanceof Player p) {
-                myCookieMenu.open(p);
-            }
-            return true;
-        });
+        Objects.requireNonNull(getCommand("mycookie"))
+                .setExecutor((sender, cmd, label, args) -> {
+                    if (sender instanceof Player p) {
+                        myCookieMenu.open(p);
+                    }
+                    return true;
+                });
 
         CookiezMenu cookiezMenu = new CookiezMenu(this);
         getServer().getPluginManager().registerEvents(cookiezMenu, this);
-        getCommand("cookiez").setExecutor((sender, cmd, label, args) -> {
-            if (sender instanceof Player p) {
-                cookiezMenu.open(p);
-            }
-            return true;
-        });
+        Objects.requireNonNull(getCommand("cookiez"))
+                .setExecutor((sender, cmd, label, args) -> {
+                    if (sender instanceof Player p) {
+                        cookiezMenu.open(p);
+                    }
+                    return true;
+                });
 
         getServer().getPluginManager().registerEvents(new AbilityTriggerListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinLoad(this), this);
         getServer().getPluginManager().registerEvents(new GUIListener(), this);
         getServer().getPluginManager().registerEvents(new CookieEatListener(), this);
         getServer().getPluginManager().registerEvents(new CookieEvents(), this);
+        getServer().getPluginManager().registerEvents(new PlayerRespawnCookiez(this), this);
 
         // 🔹 Listener για /myring toggle GUI
         getServer().getPluginManager().registerEvents(new MyRingMenuListener(ringManager), this);
 
         // === Register commands (παλιά) ===
-        getCommand("cookiez").setExecutor(new CookiezCommand(this));
-        getCommand("setgear").setExecutor(new SetGearCommand(this));
-        getCommand("mycookie").setExecutor(new MyCookieCommand(this));
+        Objects.requireNonNull(getCommand("cookiez"))
+                .setExecutor(new CookiezCommand(this));
+        Objects.requireNonNull(getCommand("setgear"))
+                .setExecutor(new SetGearCommand(this));
+        Objects.requireNonNull(getCommand("mycookie"))
+                .setExecutor(new MyCookieCommand(this));
 
         // === PASSIVE EFFECTS LOOP για cookies ===
         Bukkit.getScheduler().runTaskTimer(this, () -> {
@@ -127,7 +147,7 @@ public class PowerCookiezMAIN extends JavaPlugin {
     }
 
     // ============================================
-    // PLAYERDATA SAVE SYSTEM
+    // PLAYER DATA SAVE SYSTEM
     // ============================================
 
     public void createPlayerData() {

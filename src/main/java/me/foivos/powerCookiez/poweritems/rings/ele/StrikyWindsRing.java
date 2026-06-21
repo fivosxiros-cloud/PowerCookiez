@@ -109,7 +109,7 @@ public class StrikyWindsRing implements RingPower {
         RingManager rm = PowerCookiezMAIN.getInstance().getRingManager();
         if (!rm.isHoldingRing(player)) return;
         if (!rm.isRingEnabled(player)) return;
-        if (!RingManager.checkCooldown(player, "A", 5000)) return; // 5s cooldown
+        if (RingManager.isCooldown(player, "A", 5000)) return; // 5s cooldown
 
         Vector dash = player.getLocation().getDirection().normalize().multiply(1.8);
         dash.setY(0.4);
@@ -136,7 +136,7 @@ public class StrikyWindsRing implements RingPower {
         RingManager rm = PowerCookiezMAIN.getInstance().getRingManager();
         if (!rm.isHoldingRing(player)) return;
         if (!rm.isRingEnabled(player)) return;
-        if (!RingManager.checkCooldown(player, "B", 8000)) return; // 8s cooldown
+        if (RingManager.isCooldown(player, "B", 8000)) return; // 8s cooldown
 
         World world = player.getWorld();
         Location loc = player.getLocation();
@@ -165,7 +165,7 @@ public class StrikyWindsRing implements RingPower {
         RingManager rm = PowerCookiezMAIN.getInstance().getRingManager();
         if (!rm.isHoldingRing(player)) return;
         if (!rm.isRingEnabled(player)) return;
-        if (!RingManager.checkCooldown(player, "C", 6000)) return; // 6s cooldown
+        if (RingManager.isCooldown(player, "C", 6000)) return; // 6s cooldown
 
         World world = player.getWorld();
         Location eye = player.getEyeLocation();
@@ -207,7 +207,7 @@ public class StrikyWindsRing implements RingPower {
         RingManager rm = PowerCookiezMAIN.getInstance().getRingManager();
         if (!rm.isHoldingRing(player)) return;
         if (!rm.isRingEnabled(player)) return;
-        if (!RingManager.checkCooldown(player, "D", 10000)) return; // 10s cooldown
+        if (RingManager.isCooldown(player, "D", 10000)) return; // 10s cooldown
 
         World world = player.getWorld();
         Location loc = player.getLocation();

@@ -5,10 +5,7 @@ import me.foivos.powerCookiez.poweritems.RingManager;
 import me.foivos.powerCookiez.poweritems.rings.RingCategory;
 import me.foivos.powerCookiez.poweritems.rings.RingPower;
 import org.bukkit.*;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.*;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -111,7 +108,7 @@ public class PlanetaryEarthRing implements RingPower {
         RingManager rm = PowerCookiezMAIN.getInstance().getRingManager();
         if (!rm.isHoldingRing(player)) return;
         if (!rm.isRingEnabled(player)) return;
-        if (!RingManager.checkCooldown(player, "A", 6000)) return; // 6s cooldown
+        if (RingManager.isCooldown(player, "A", 6000)) return; // 6s cooldown
 
         World world = player.getWorld();
         Location loc = player.getLocation();
@@ -139,7 +136,7 @@ public class PlanetaryEarthRing implements RingPower {
         RingManager rm = PowerCookiezMAIN.getInstance().getRingManager();
         if (!rm.isHoldingRing(player)) return;
         if (!rm.isRingEnabled(player)) return;
-        if (!RingManager.checkCooldown(player, "B", 7000)) return; // 7s cooldown
+        if (RingManager.isCooldown(player, "B", 7000)) return; // 7s cooldown
 
         World world = player.getWorld();
         Location loc = player.getLocation();
@@ -163,7 +160,7 @@ public class PlanetaryEarthRing implements RingPower {
         RingManager rm = PowerCookiezMAIN.getInstance().getRingManager();
         if (!rm.isHoldingRing(player)) return;
         if (!rm.isRingEnabled(player)) return;
-        if (!RingManager.checkCooldown(player, "C", 8000)) return; // 8s cooldown
+        if (RingManager.isCooldown(player, "C", 8000)) return; // 8s cooldown
 
         World world = player.getWorld();
         Location eye = player.getEyeLocation();
@@ -207,7 +204,7 @@ public class PlanetaryEarthRing implements RingPower {
         RingManager rm = PowerCookiezMAIN.getInstance().getRingManager();
         if (!rm.isHoldingRing(player)) return;
         if (!rm.isRingEnabled(player)) return;
-        if (!RingManager.checkCooldown(player, "D", 10000)) return; // 10s cooldown
+        if (RingManager.isCooldown(player, "D", 10000)) return; // 10s cooldown
 
         World world = player.getWorld();
         Location center = player.getLocation();
