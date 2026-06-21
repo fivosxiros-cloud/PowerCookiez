@@ -1,17 +1,18 @@
 package me.foivos.powerCookiez;
 
+import me.foivos.powerCookiez.PowerCookiezMAIN;
+import me.foivos.powerCookiez.CookieManager;
+import me.foivos.powerCookiez.poweritems.gui.KeybindTutorialGUI;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 public class CookiezMenu implements Listener {
 
@@ -25,59 +26,65 @@ public class CookiezMenu implements Listener {
 
     public void open(Player p) {
 
-        Inventory inv = Bukkit.createInventory(null, 54, ChatColor.GOLD + "All Cookies");
+        Inventory gui = Bukkit.createInventory(null, 54, "§6§lCookiez");
 
-        int slot = 0;
+        // Background
+        ItemStack glass = new ItemStack(Material.ORANGE_STAINED_GLASS_PANE);
+        ItemMeta gm = glass.getItemMeta();
+        gm.setDisplayName(" ");
+        glass.setItemMeta(gm);
 
-        for (CookiePower cookie : cookieManager.getAllCookieDisplays()) {
+        for (int i = 0; i < 54; i++) gui.setItem(i, glass);
 
-            ItemStack item = new ItemStack(cookie.getDisplayMaterial());
+        // Title item
+        ItemStack title = new ItemStack(Material.COOKIE);
+        ItemMeta tm = title.getItemMeta();
+        tm.setDisplayName("§6§lYour Cookiez");
+        tm.setLore(Arrays.asList(
+                "§7Click a cookie to eat it.",
+                "§7Each cookie has 6 gears.",
+                "",
+                "§eUse DOUBLE SHIFT + KEY to activate gears."
+        ));
+        title.setItemMeta(tm);
+        gui.setItem(4, title);
+
+        // ⭐ KEYBINDS BUTTON ⭐
+        ItemStack keybinds = new ItemStack(Material.BOOK);
+        ItemMeta km = keybinds.getItemMeta();
+        km.setDisplayName("§b§l📘 Keybinds Tutorial");
+        km.setLore(Arrays.asList(
+                "§7View all keybinds for:",
+                "§f• Cookiez Gears",
+                "§f• Ring Abilities",
+                "",
+                "§eClick to open"
+        ));
+        keybinds.setItemMeta(km);
+        gui.setItem(49, keybinds);
+
+        // Place cookies
+        int slot = 10;
+        for (var cookie : cookieManager.getAllCookies()) {
+
+            ItemStack item = cookie.getDisplayItem();
             ItemMeta meta = item.getItemMeta();
 
-            meta.setDisplayName(ChatColor.AQUA + cookie.getName());
+            meta.setLore(Arrays.asList(
+                    "§7" + cookie.getDescription(),
+                    "",
+                    "§eClick to eat this cookie"
+            ));
 
-            List<String> lore = new ArrayList<>();
-            lore.add(ChatColor.GRAY + cookie.getDescription());
-            lore.add("");
-            lore.add(ChatColor.YELLOW + "Click to consume this cookie!");
-
-            meta.setLore(lore);
             item.setItemMeta(meta);
 
-            inv.setItem(slot++, item);
+            gui.setItem(slot, item);
+
+            slot++;
+            if (slot == 17) slot = 19;
+            if (slot == 26) slot = 28;
         }
 
-        p.openInventory(inv);
-    }
-
-    @EventHandler
-    public void onClick(InventoryClickEvent e) {
-        if (!e.getView().getTitle().equals(ChatColor.GOLD + "All Cookies")) return;
-
-        e.setCancelled(true);
-
-        Player p = (Player) e.getWhoClicked();
-
-        ItemStack clicked = e.getCurrentItem();
-        if (clicked == null || !clicked.hasItemMeta()) return;
-
-        String cookieName = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
-
-        CookiePower cookie = cookieManager.getCookie(cookieName);
-        if (cookie == null) return;
-
-        // Cooldown check
-        if (cookieManager.isOnCooldown(p)) {
-            p.sendMessage(ChatColor.RED + "You must wait before eating another cookie!");
-            return;
-        }
-
-        // Eat cookie
-        cookieManager.setCooldown(p);
-        cookieManager.onEat(p, cookieName);
-
-        p.sendMessage(ChatColor.GREEN + "You consumed the " + cookieName + " cookie!");
-
-        p.closeInventory();
+        p.openInventory(gui);
     }
 }

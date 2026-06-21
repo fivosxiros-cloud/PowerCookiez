@@ -1,10 +1,12 @@
 package me.foivos.powerCookiez.poweritems.rings;
 
+import me.foivos.powerCookiez.PowerCookiezMAIN;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,45 +14,67 @@ import java.util.UUID;
 
 public class WolfModelManager {
 
-    private final Map<UUID, Wolf> wolfMap = new HashMap<>();
+    private final Map<UUID, Wolf> wolves = new HashMap<>();
+    private final PowerCookiezMAIN plugin = PowerCookiezMAIN.getInstance();
 
-    public boolean isWolf(Player player) {
-        return wolfMap.containsKey(player.getUniqueId());
+    public boolean isTransformed(Player p) {
+        return wolves.containsKey(p.getUniqueId());
     }
 
-    public Wolf getWolf(Player player) {
-        return wolfMap.get(player.getUniqueId());
-    }
+    public void spawnWolf(Player p) {
 
-    public Wolf spawnWolf(Player player) {
-        if (isWolf(player)) return getWolf(player);
+        removeWolf(p);
 
-        World world = player.getWorld();
-        Location loc = player.getLocation().clone().add(0, 2.2, 0);
+        Wolf wolf = (Wolf) p.getWorld().spawnEntity(
+                p.getLocation().clone().add(0, 1.4, 0),
+                EntityType.WOLF
+        );
 
-        Wolf wolf = (Wolf) world.spawnEntity(loc, EntityType.WOLF);
-        wolf.setAdult();
         wolf.setAI(false);
+        wolf.setGravity(true); //============================================================
         wolf.setInvulnerable(true);
-        wolf.setCollidable(false);
         wolf.setSilent(true);
-        wolf.setCustomNameVisible(false);
-        wolf.setAngry(false);
-        wolf.setGravity(false);
+        wolf.setCollidable(false);
+        wolf.setAdult();
+        wolf.setCustomName("§fSpirit Wolf");
+        wolf.setCustomNameVisible(true);
 
-        wolfMap.put(player.getUniqueId(), wolf);
-        return wolf;
+        wolves.put(p.getUniqueId(), wolf);
+
+        // FOLLOW TASK
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!isTransformed(p)) { cancel(); return; }
+
+                Wolf w = wolves.get(p.getUniqueId());
+                if (w == null || w.isDead()) { cancel(); return; }
+
+                Location target = p.getLocation().clone().add(-1.2, 1.2, -1.2);
+                Vector dir = target.toVector().subtract(w.getLocation().toVector()).multiply(0.25);
+
+                w.setVelocity(dir);
+            }
+        }.runTaskTimer(plugin, 1L, 1L);
+
+        // HOVER TASK
+        new BukkitRunnable() {
+            double t = 0;
+            @Override
+            public void run() {
+                if (!isTransformed(p)) { cancel(); return; }
+
+                Wolf w = wolves.get(p.getUniqueId());
+                if (w == null || w.isDead()) { cancel(); return; }
+
+                t += 0.15;
+                w.teleport(w.getLocation().clone().add(0, Math.sin(t) * 0.05, 0));
+            }
+        }.runTaskTimer(plugin, 1L, 1L);
     }
 
-    public void removeWolf(Player player) {
-        Wolf wolf = wolfMap.remove(player.getUniqueId());
-        if (wolf != null && !wolf.isDead()) wolf.remove();
-    }
-
-    public void removeAll() {
-        for (Wolf wolf : wolfMap.values()) {
-            if (wolf != null && !wolf.isDead()) wolf.remove();
-        }
-        wolfMap.clear();
+    public void removeWolf(Player p) {
+        Wolf w = wolves.remove(p.getUniqueId());
+        if (w != null && !w.isDead()) w.remove();
     }
 }

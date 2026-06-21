@@ -67,6 +67,13 @@ public class RingManager {
         }
     }
 
+    public static void disableRing(Player p) {
+        if ( !isRingEnabled(p)) return;
+
+        ringEnabled.put(p.getUniqueId(), false);
+
+        stopAllRingEffects(p);
+    }
 
     // ============================================================
     // REGISTER RINGS

@@ -59,8 +59,15 @@ public class AbilityTriggerListener implements Listener {
 
         if (!doubleShiftReady.getOrDefault(id, false)) return;
 
-        RingPower ring = plugin.getRingManager().getHeldRing(p);
-        if (ring == null) return;
+        // ❌ ΠΑΛΙΑ:
+        // RingPower ring = plugin.getRingManager().getHeldRing(p);
+
+        // ✅ ΝΕΟ: χρησιμοποιούμε ΜΟΝΟ το active ring από /pwring
+        RingPower ring = RingManager.getActiveRing(p);
+        if (ring == null) {
+            doubleShiftReady.put(id, false);
+            return;
+        }
 
         int slot = e.getNewSlot();
 

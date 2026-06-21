@@ -4,6 +4,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -52,6 +53,40 @@ public class CookieManager {
         registerCookie(new SmokySmokeCookie());
         registerCookie(new ZeroGravityCookie());
     }
+
+    public Collection<CookiePower> getAllCookies() {
+        return cookies.values();
+    }
+
+    public CookiePower getCookieByItem(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) return null;
+
+        String display = ChatColor.stripColor(item.getItemMeta().getDisplayName());
+
+        for (CookiePower cookie : cookies.values()) {
+            String cookieName = ChatColor.stripColor(cookie.getDisplayItem().getItemMeta().getDisplayName());
+            if (cookieName.equalsIgnoreCase(display)) {
+                return cookie;
+            }
+        }
+        return null;
+    }
+
+    public void eatCookie(Player p, String cookieName) {
+
+        CookiePower cookie = cookies.get(cookieName);
+        if (cookie == null) return;
+
+        setLastCookieEaten(p, cookieName);
+        setGearLevel(p, 0);
+
+        cookie.activate(p);
+
+        setCooldown(p);
+
+        p.sendMessage(ChatColor.AQUA + "You consumed the " + cookieName + " cookie!");
+    }
+
 
     public void registerCookie(CookiePower cookie) {
         cookies.put(cookie.getName(), cookie);

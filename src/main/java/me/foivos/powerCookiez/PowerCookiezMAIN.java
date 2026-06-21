@@ -5,6 +5,7 @@ import me.foivos.powerCookiez.poweritems.commands.PowerRingCommand;
 import me.foivos.powerCookiez.poweritems.gui.MyRingGUI;
 import me.foivos.powerCookiez.poweritems.gui.AllRingsGUI;
 import me.foivos.powerCookiez.poweritems.rings.MyRingMenuListener;
+import me.foivos.powerCookiez.poweritems.rings.PlayerListener;
 import me.foivos.powerCookiez.poweritems.rings.ani.FoxyFoxRing;
 import me.foivos.powerCookiez.poweritems.rings.ani.ShadowyDragonRing;
 import me.foivos.powerCookiez.poweritems.rings.ani.WolfyWolfRing;
@@ -95,6 +96,7 @@ public class PowerCookiezMAIN extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new GUIListener(), this);
         getServer().getPluginManager().registerEvents(new CookieEatListener(), this);
         getServer().getPluginManager().registerEvents(new CookieEvents(), this);
+        getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
 
         // 🔹 Listener για /myring toggle GUI
         getServer().getPluginManager().registerEvents(new MyRingMenuListener(ringManager), this);
@@ -117,6 +119,9 @@ public class PowerCookiezMAIN extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+        RingManager.disableRing(player);
+        }
         savePlayerData();
         getLogger().info("PowerCookiez disabled!");
     }

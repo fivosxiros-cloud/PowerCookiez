@@ -1,13 +1,17 @@
 package me.foivos.powerCookiez.poweritems.rings.ani;
 
-import me.foivos.powerCookiez.poweritems.RingManager;
+import me.foivos.powerCookiez.PowerCookiezMAIN;
 import me.foivos.powerCookiez.poweritems.rings.DragonModelManager;
 import me.foivos.powerCookiez.poweritems.rings.RingCategory;
 import me.foivos.powerCookiez.poweritems.rings.RingPower;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
+
+import java.util.Arrays;
 
 public class ShadowyDragonRing implements RingPower {
 
@@ -19,25 +23,48 @@ public class ShadowyDragonRing implements RingPower {
     }
 
     @Override
-    public ItemStack getDisplayItem() {
-        ItemStack item = new ItemStack(Material.DRAGON_HEAD);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§5§lShadowy Dragon Ring");
-        item.setItemMeta(meta);
-        return item;
-    }
-
-    @Override
     public RingCategory getCategory() {
         return RingCategory.ANI;
     }
 
     @Override
-    public void applyPassives(Player p) {
-        // no passives for now
+    public ItemStack getDisplayItem() {
+
+        ItemStack item = new ItemStack(Material.DRAGON_HEAD);
+        ItemMeta meta = item.getItemMeta();
+
+        meta.setDisplayName("§5§lShadowy Dragon Ring");
+        meta.setLore(Arrays.asList(
+                "§7Summon a shadow dragon spirit.",
+                "§7Dash, breath and corrupt your enemies.",
+                "",
+                "§eAbility A: §fSummon / Dismiss Dragon",
+                "§eAbility B: §fShadow Dash",
+                "§eAbility C: §fVoid Breath",
+                "§eAbility D: §fCorruption Burst"
+        ));
+
+        // ⭐ REQUIRED FOR /pwring
+        meta.getPersistentDataContainer().set(
+                new NamespacedKey(PowerCookiezMAIN.getInstance(), "ringName"),
+                PersistentDataType.STRING,
+                getName()
+        );
+
+        item.setItemMeta(meta);
+        return item;
     }
 
-    // Ability A = DOUBLE SHIFT + 1 → summon / dismiss dragon
+    @Override
+    public void applyPassives(Player p) {
+        // No passives for now
+    }
+
+    // ============================================================
+    // ABILITIES
+    // ============================================================
+
+    // Ability A → Summon / Dismiss Dragon
     @Override
     public void abilityA(Player p) {
         if (!modelManager.isTransformed(p)) {
@@ -47,19 +74,19 @@ public class ShadowyDragonRing implements RingPower {
         }
     }
 
-    // Ability B = DOUBLE SHIFT + 2 → dash
+    // Ability B → Shadow Dash
     @Override
     public void abilityB(Player p) {
         modelManager.shadowDash(p);
     }
 
-    // Ability C = DOUBLE SHIFT + 3 → breath
+    // Ability C → Void Breath
     @Override
     public void abilityC(Player p) {
         modelManager.startBreath(p);
     }
 
-    // Ability D = DOUBLE SHIFT + 4 → corruption burst
+    // Ability D → Corruption Burst
     @Override
     public void abilityD(Player p) {
         modelManager.corruptionBurst(p);

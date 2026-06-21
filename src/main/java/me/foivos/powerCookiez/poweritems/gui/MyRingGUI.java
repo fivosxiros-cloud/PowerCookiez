@@ -11,39 +11,67 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.Arrays;
+
 public class MyRingGUI {
 
-    public static void open(Player player) {
+    public static void open(Player p) {
 
-        Inventory inv = Bukkit.createInventory(null, 27, ChatColor.AQUA + "My Ring");
+        Inventory gui = Bukkit.createInventory(null, 27, "§d§lMy Ring");
 
-        RingPower ring = RingManager.getActiveRing(player);
+        // Background
+        ItemStack glass = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+        ItemMeta gm = glass.getItemMeta();
+        gm.setDisplayName(" ");
+        glass.setItemMeta(gm);
 
-        // === SLOT 13: ACTIVE RING ===
+        for (int i = 0; i < 27; i++) gui.setItem(i, glass);
+
+        // Active ring
+        RingPower ring = RingManager.getActiveRing(p);
+
+        ItemStack ringItem;
         if (ring != null) {
-            inv.setItem(13, ring.getDisplayItem());
+            ringItem = ring.getDisplayItem();
         } else {
-            ItemStack none = new ItemStack(Material.BARRIER);
-            ItemMeta meta = none.getItemMeta();
+            ringItem = new ItemStack(Material.BARRIER);
+            ItemMeta meta = ringItem.getItemMeta();
             meta.setDisplayName("§cNo active ring");
-            none.setItemMeta(meta);
-            inv.setItem(13, none);
+            meta.setLore(Arrays.asList("§7Use /pwring while holding a ring"));
+            ringItem.setItemMeta(meta);
         }
 
-        // === SLOT 11: ENABLE ===
-        ItemStack enable = new ItemStack(Material.LIME_DYE);
-        ItemMeta em = enable.getItemMeta();
-        em.setDisplayName("§aEnable Ring");
-        enable.setItemMeta(em);
-        inv.setItem(11, enable);
+        gui.setItem(13, ringItem);
 
-        // === SLOT 15: DISABLE ===
-        ItemStack disable = new ItemStack(Material.RED_DYE);
-        ItemMeta dm = disable.getItemMeta();
-        dm.setDisplayName("§cDisable Ring");
-        disable.setItemMeta(dm);
-        inv.setItem(15, disable);
+        // Enable / Disable button
+        boolean enabled = RingManager.isRingEnabled(p);
 
-        player.openInventory(inv);
+        ItemStack toggle = new ItemStack(enabled ? Material.LIME_DYE : Material.RED_DYE);
+        ItemMeta tm = toggle.getItemMeta();
+        tm.setDisplayName(enabled ? "§aRing Enabled" : "§cRing Disabled");
+        tm.setLore(Arrays.asList(
+                "§7Click to toggle your ring",
+                enabled ? "§cDisable ring" : "§aEnable ring"
+        ));
+        toggle.setItemMeta(tm);
+
+        gui.setItem(11, toggle);
+
+        // ⭐ KEYBINDS BUTTON ⭐
+        ItemStack keybinds = new ItemStack(Material.BOOK);
+        ItemMeta km = keybinds.getItemMeta();
+        km.setDisplayName("§b§l📘 Keybinds Tutorial");
+        km.setLore(Arrays.asList(
+                "§7View all keybinds for:",
+                "§f• Cookiez Gears",
+                "§f• Ring Abilities",
+                "",
+                "§eClick to open"
+        ));
+        keybinds.setItemMeta(km);
+
+        gui.setItem(15, keybinds);
+
+        p.openInventory(gui);
     }
 }
