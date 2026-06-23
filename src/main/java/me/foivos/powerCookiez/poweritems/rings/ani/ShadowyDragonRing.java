@@ -39,9 +39,9 @@ public class ShadowyDragonRing implements RingPower {
                 "§7Dash, breath and corrupt your enemies.",
                 "",
                 "§eAbility A: §fSummon / Dismiss Dragon",
-                "§eAbility B: §fShadow Dash",
-                "§eAbility C: §fVoid Breath",
-                "§eAbility D: §fCorruption Burst"
+                "§eAbility B: §fcoming soon",
+                "§eAbility C: §fcoming soon",
+                "§eAbility D: §fcoming soon"
         ));
 
         // ⭐ REQUIRED FOR /pwring

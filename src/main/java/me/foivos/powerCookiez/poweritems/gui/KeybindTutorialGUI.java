@@ -34,14 +34,14 @@ public class KeybindTutorialGUI {
         // TITLE ITEMS
         // ============================================================
         gui.setItem(4, createItem(Material.BOOK, "§b§lKEYBIND TUTORIAL",
-                "§7Δες όλα τα κουμπιά για Cookiez & Rings"));
+                "§7All keybinds for Cookiez & Rings"));
 
         gui.setItem(20, createItem(Material.COOKIE, "§a§lCOOKIEZ KEYBINDS",
-                "§7Όλα τα Gears ενεργοποιούνται με:",
+                "§7Every Gear is activated with the following keybinds :",
                 "§fDOUBLE SHIFT + KEY"));
 
         gui.setItem(24, createItem(Material.DRAGON_HEAD, "§d§lRINGS KEYBINDS",
-                "§7Όλες οι abilities ενεργοποιούνται με:",
+                "§7All abilities are activated with the following keybinds :",
                 "§fDOUBLE SHIFT + NUMBER"));
 
         // ============================================================

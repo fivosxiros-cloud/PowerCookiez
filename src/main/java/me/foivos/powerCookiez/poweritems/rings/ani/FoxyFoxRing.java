@@ -40,7 +40,7 @@ public class FoxyFoxRing implements RingPower {
 
         meta.setDisplayName("§6§lFoxy Fox Ring");
         meta.setLore(Arrays.asList(
-                "§7Transform into a fox spirit.",
+                "§7Transform into a fox .",
                 "§7Gain agility, stealth and night vision.",
                 "",
                 "§eAbility A: §fFox Form Toggle"

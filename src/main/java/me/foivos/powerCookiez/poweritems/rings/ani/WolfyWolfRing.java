@@ -40,7 +40,7 @@ public class WolfyWolfRing implements RingPower {
 
         meta.setDisplayName("§f§lWolfy Wolf Ring");
         meta.setLore(Arrays.asList(
-                "§7Transform into a wolf spirit.",
+                "§7Transform into a wolf.",
                 "§7Gain speed, jump boost and stealth.",
                 "",
                 "§eAbility A: §fWolf Form Toggle"
@@ -76,6 +76,8 @@ public class WolfyWolfRing implements RingPower {
         player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 1, false, false, false));
         player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 1, false, false, false));
         player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, Integer.MAX_VALUE, 1, false, false, false));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, Integer.MAX_VALUE, 1, false, false, false));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false, false));
 
         wolfModelManager.spawnWolf(player);
 
@@ -90,6 +92,8 @@ public class WolfyWolfRing implements RingPower {
         player.removePotionEffect(PotionEffectType.INVISIBILITY);
         player.removePotionEffect(PotionEffectType.SPEED);
         player.removePotionEffect(PotionEffectType.JUMP_BOOST);
+        player.removePotionEffect(PotionEffectType.STRENGTH);
+        player.removePotionEffect(PotionEffectType.NIGHT_VISION);
 
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WOLF_DEATH, 1f, 0.8f);
         player.getWorld().spawnParticle(Particle.SMOKE, player.getLocation(), 25, 0.4, 0.4, 0.4, 0.02);

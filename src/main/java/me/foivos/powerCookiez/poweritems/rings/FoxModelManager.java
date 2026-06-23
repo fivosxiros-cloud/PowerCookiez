@@ -42,13 +42,14 @@ public class FoxModelManager {
         fox.setSilent(true);
         fox.setCollidable(false);
         fox.setCustomName("§6Foxy Fox");
-        fox.setCustomNameVisible(true);
+        fox.setCustomNameVisible(false);//=======================================
         //p.setCollidable(false);
         foxes.put(p.getUniqueId(), fox);
         Team team = getOrCreateNoCollisionTeam();
 
         team.addEntry(p.getName());
         team.addEntry(fox.getUniqueId().toString());
+
         // FOLLOW TASK
         new BukkitRunnable() {
             @Override
@@ -67,6 +68,7 @@ public class FoxModelManager {
         }.runTaskTimer(plugin, 1L, 1L);
 
     }
+
     private Team getOrCreateNoCollisionTeam() {
         Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
 
@@ -81,6 +83,7 @@ public class FoxModelManager {
         }
         return team;
     }
+
     public void removeFox(Player p) {
         Fox f = foxes.remove(p.getUniqueId());
         if (f != null && !f.isDead()) f.remove();
