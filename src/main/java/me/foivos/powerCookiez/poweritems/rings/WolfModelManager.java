@@ -31,7 +31,7 @@ public class WolfModelManager {
         );
 
         wolf.setAI(false);
-        wolf.setGravity(true); //============================================================
+        wolf.setGravity(false);
         wolf.setInvulnerable(true);
         wolf.setSilent(true);
         wolf.setCollidable(false);
